@@ -20,13 +20,37 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
     
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+    - name: Download and Setup Gradle 8.0
+      run: |
+        echo "Downloading Gradle 8.0..."
+        mkdir -p /opt/gradle
+        cd /opt/gradle
+        
+        # Download gradle 8.0
+        wget -q https://services.gradle.org/distributions/gradle-8.0-bin.zip
+        
+        # Extract
+        unzip -q gradle-8.0-bin.zip
+        
+        # Add to PATH
+        export PATH="/opt/gradle/gradle-8.0/bin:$PATH"
+        
+        # Verify
+        gradle --version
+        
+        # Export for next steps
+        echo "PATH=/opt/gradle/gradle-8.0/bin:$PATH" >> $GITHUB_ENV
     
-    - name: Build APK
-      run: ./gradlew assembleDebug
+    - name: Build APK with Gradle 8.0
+      run: |
+        echo "Gradle version:"
+        gradle --version
+        echo ""
+        echo "Building APK..."
+        gradle assembleDebug --stacktrace
     
     - name: Upload APK Artifact
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: freefire-apk
