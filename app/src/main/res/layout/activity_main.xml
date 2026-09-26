@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <FrameLayout
+        android:id="@+id/freeFireCard"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@android:color/darker_gray"
+        android:elevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Free Fire"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/launchFFBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Launch Mod Menu"
+                android:layout_marginTop="16dp" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/iconX"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|end"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Toggle Menu"
+            android:scaleType="centerInside" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/modMenuContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/aimAssistCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Aim Assist" />
+
+                <CheckBox
+                    android:id="@+id/silentAimCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Silent Aim" />
+
+                <CheckBox
+                    android:id="@+id/autoAimCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Auto Aim" />
+
+                <CheckBox
+                    android:id="@+id/espBoxCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ESP Box" />
+
+                <CheckBox
+                    android:id="@+id/espLineCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ESP Line" />
+
+                <CheckBox
+                    android:id="@+id/espNameCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ESP Name" />
+
+                <CheckBox
+                    android:id="@+id/espHealthCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ESP Health" />
+
+                <CheckBox
+                    android:id="@+id/espDistanceCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ESP Distance" />
+
+                <CheckBox
+                    android:id="@+id/headshotOnlyCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Headshot Only" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Smooth Value"
+                    android:layout_marginTop="16dp" />
+
+                <SeekBar
+                    android:id="@+id/smoothSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="100" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FOV"
+                    android:layout_marginTop="16dp" />
+
+                <SeekBar
+                    android:id="@+id/fovSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="180" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</LinearLayout>
