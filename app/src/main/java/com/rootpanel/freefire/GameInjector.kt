@@ -9,16 +9,21 @@ class GameInjector(private val rootUtils: RootUtils) {
         "com.dts.freefirebd"     // Bangladesh
     )
     
-    private val FF_PACKAGE = detectFFPackage()
-    private val FF_PID = getPID(FF_PACKAGE)
+    // Lazy initialize - don't block on startup!
+    private val FF_PACKAGE: String by lazy { detectFFPackage() }
+    private val FF_PID: Int by lazy { getPID(FF_PACKAGE) }
     
     /**
      * Free Fire package detect karo
      */
     private fun detectFFPackage(): String {
-        return FF_PACKAGES.firstOrNull { packageName ->
-            rootUtils.isPackageInstalled(packageName)
-        } ?: "com.dts.freefire"
+        return try {
+            FF_PACKAGES.firstOrNull { packageName ->
+                rootUtils.isPackageInstalled(packageName)
+            } ?: "com.dts.freefire"
+        } catch (e: Exception) {
+            "com.dts.freefire"
+        }
     }
     
     /**

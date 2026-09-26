@@ -14,46 +14,51 @@ class MainActivity : AppCompatActivity() {
     private var modMenuVisible = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        
-        gameInjector = GameInjector(rootUtils)
-        
-        // Root permission request karo
-        requestRootPermission()
-        
-        // UI Elements
-        val iconX = findViewById<ImageButton>(R.id.iconX)
-        val modMenuContainer = findViewById<LinearLayout>(R.id.modMenuContainer)
-        val freeFireCard = findViewById<LinearLayout>(R.id.freeFireCard)
-        val launchFFBtn = findViewById<Button>(R.id.launchFFBtn)
-        
-        // X icon - toggle mod menu
-        iconX.setOnClickListener {
-            if (isRootGranted) {
-                modMenuVisible = !modMenuVisible
-                modMenuContainer.visibility = if (modMenuVisible) View.VISIBLE else View.GONE
-            } else {
-                Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+        try {
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_main)
+            
+            gameInjector = GameInjector(rootUtils)
+            
+            // Root permission request karo
+            requestRootPermission()
+            
+            // UI Elements
+            val iconX = findViewById<ImageButton>(R.id.iconX)
+            val modMenuContainer = findViewById<LinearLayout>(R.id.modMenuContainer)
+            val freeFireCard = findViewById<LinearLayout>(R.id.freeFireCard)
+            val launchFFBtn = findViewById<Button>(R.id.launchFFBtn)
+            
+            // X icon - toggle mod menu
+            iconX.setOnClickListener {
+                if (isRootGranted) {
+                    modMenuVisible = !modMenuVisible
+                    modMenuContainer.visibility = if (modMenuVisible) View.VISIBLE else View.GONE
+                } else {
+                    Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
-        
-        // Free Fire Card Click
-        freeFireCard.setOnClickListener {
-            if (isRootGranted) {
-                openModMenu()
-            } else {
-                Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+            
+            // Free Fire Card Click
+            freeFireCard.setOnClickListener {
+                if (isRootGranted) {
+                    openModMenu()
+                } else {
+                    Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
-        
-        // Launch Button
-        launchFFBtn.setOnClickListener {
-            if (isRootGranted) {
-                openModMenu()
-            } else {
-                Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+            
+            // Launch Button
+            launchFFBtn.setOnClickListener {
+                if (isRootGranted) {
+                    openModMenu()
+                } else {
+                    Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "❌ Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
