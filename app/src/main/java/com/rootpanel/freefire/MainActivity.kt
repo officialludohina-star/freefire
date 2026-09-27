@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_main)
             
-            gameInjector = GameInjector(rootUtils)
+            gameInjector = GameInjector(rootUtils, this)
             
             // Root permission request karo
             requestRootPermission()

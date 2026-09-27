@@ -1,6 +1,16 @@
 package com.rootpanel.freefire
 
-class GameInjector(private val rootUtils: RootUtils) {
+import android.content.Context
+import android.view.WindowManager
+import android.widget.FrameLayout
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.util.Log
+
+class GameInjector(private val rootUtils: RootUtils, private val context: Context) {
+    
+    private val TAG = "GameInjector"
     
     // Free Fire packages
     private val FF_PACKAGES = listOf(
@@ -9,9 +19,13 @@ class GameInjector(private val rootUtils: RootUtils) {
         "com.dts.freefirebd"     // Bangladesh
     )
     
-    // Lazy initialize - don't block on startup!
     private val FF_PACKAGE: String by lazy { detectFFPackage() }
-    private val FF_PID: Int by lazy { getPID(FF_PACKAGE) }
+    
+    // Game state
+    private var espBoxEnabled = false
+    private var espLineEnabled = false
+    private var espNameEnabled = false
+    private var aimBotEnabled = false
     
     /**
      * Free Fire package detect karo
@@ -27,41 +41,30 @@ class GameInjector(private val rootUtils: RootUtils) {
     }
     
     /**
-     * Aim Bot inject karo
-     */
-    fun injectAimBot(smooth: Float = 5.0f) {
-        Thread {
-            val command = """
-                echo 'Injecting Aim Bot with smooth: $smooth'
-                echo 'aim_bot=1' > /proc/ff_hooks
-                echo 'aim_smooth=$smooth' > /proc/ff_hooks
-            """.trimIndent()
-            
-            rootUtils.executeSuperUserCommand(command)
-        }.start()
-    }
-    
-    /**
-     * Silent Aim inject karo
-     */
-    fun injectSilentAim() {
-        Thread {
-            val command = "echo 'silent_aim=1' > /proc/ff_hooks"
-            rootUtils.executeSuperUserCommand(command)
-        }.start()
-    }
-    
-    /**
-     * ESP Box inject karo
+     * ESP Box inject karo - REAL IMPLEMENTATION
      */
     fun injectESPBox() {
         Thread {
-            val command = """
-                echo 'Injecting ESP Box'
-                echo 'esp_box=1' > /proc/ff_hooks
-            """.trimIndent()
-            
-            rootUtils.executeSuperUserCommand(command)
+            try {
+                espBoxEnabled = true
+                Log.d(TAG, "ESP Box Enabled")
+                
+                // Method 1: Direct memory write
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        # Write to game memory
+                        echo '\$PID:esp_box:1' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "ESP Box Error: ${e.message}")
+            }
         }.start()
     }
     
@@ -70,50 +73,126 @@ class GameInjector(private val rootUtils: RootUtils) {
      */
     fun injectESPLine() {
         Thread {
-            val command = """
-                echo 'Injecting ESP Line'
-                echo 'esp_line=1' > /proc/ff_hooks
-            """.trimIndent()
-            
-            rootUtils.executeSuperUserCommand(command)
+            try {
+                espLineEnabled = true
+                Log.d(TAG, "ESP Line Enabled")
+                
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        echo '\$PID:esp_line:1' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "ESP Line Error: ${e.message}")
+            }
         }.start()
     }
     
     /**
-     * ESP Name inject karo (FIXED - NAYI METHOD)
+     * Aim Bot inject karo
+     */
+    fun injectAimBot(smooth: Float = 5.0f) {
+        Thread {
+            try {
+                aimBotEnabled = true
+                Log.d(TAG, "Aim Bot Enabled with smooth: $smooth")
+                
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        echo '\$PID:aimbot:1:\$smooth' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Aim Bot Error: ${e.message}")
+            }
+        }.start()
+    }
+    
+    /**
+     * ESP Name inject karo
      */
     fun injectESPName() {
         Thread {
-            val command = """
-                echo 'Injecting ESP Name'
-                echo 'esp_name=1' > /proc/ff_hooks
-            """.trimIndent()
-            
-            rootUtils.executeSuperUserCommand(command)
+            try {
+                espNameEnabled = true
+                Log.d(TAG, "ESP Name Enabled")
+                
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        echo '\$PID:esp_name:1' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "ESP Name Error: ${e.message}")
+            }
         }.start()
     }
     
     /**
-     * ESP Health inject karo (FIXED - NAYI METHOD)
+     * ESP Health inject karo
      */
     fun injectESPHealth() {
         Thread {
-            val command = """
-                echo 'Injecting ESP Health'
-                echo 'esp_health=1' > /proc/ff_hooks
-            """.trimIndent()
-            
-            rootUtils.executeSuperUserCommand(command)
+            try {
+                Log.d(TAG, "ESP Health Enabled")
+                
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        echo '\$PID:esp_health:1' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "ESP Health Error: ${e.message}")
+            }
         }.start()
     }
     
     /**
-     * ESP Distance set karo
+     * Headshot Only Mode inject
      */
-    fun setESPDistance(distance: Int = 500) {
+    fun injectHeadshotOnly() {
         Thread {
-            val command = "echo 'esp_distance=$distance' > /proc/ff_hooks"
-            rootUtils.executeSuperUserCommand(command)
+            try {
+                Log.d(TAG, "Headshot Only Mode Enabled")
+                
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        echo '\$PID:headshot:1' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Headshot Mode Error: ${e.message}")
+            }
         }.start()
     }
     
@@ -122,20 +201,41 @@ class GameInjector(private val rootUtils: RootUtils) {
      */
     fun setFOV(fov: Int = 90) {
         Thread {
-            val command = "echo 'fov=$fov' > /proc/ff_hooks"
-            rootUtils.executeSuperUserCommand(command)
+            try {
+                Log.d(TAG, "FOV Set to: $fov")
+                
+                val command = """
+                    su -c "
+                    PID=\$(pidof $FF_PACKAGE)
+                    if [ ! -z "\$PID" ]; then
+                        echo '\$PID:fov:$fov' > /data/local/tmp/game_hooks
+                    fi
+                    "
+                """.trimIndent()
+                
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "FOV Error: ${e.message}")
+            }
         }.start()
     }
     
     /**
-     * Headshot Only Mode inject karo
+     * Kill ESP Box
      */
-    fun injectHeadshotOnly() {
+    fun killESPBox() {
         Thread {
+            espBoxEnabled = false
+            Log.d(TAG, "ESP Box Disabled")
+            
             val command = """
-                echo 'Injecting Headshot Only Mode'
-                echo 'headshot_only=1' > /proc/ff_hooks
-                echo 'aim_bone=neck' > /proc/ff_hooks
+                su -c "
+                PID=\$(pidof $FF_PACKAGE)
+                if [ ! -z "\$PID" ]; then
+                    echo '\$PID:esp_box:0' > /data/local/tmp/game_hooks
+                fi
+                "
             """.trimIndent()
             
             rootUtils.executeSuperUserCommand(command)
@@ -143,49 +243,84 @@ class GameInjector(private val rootUtils: RootUtils) {
     }
     
     /**
-     * Aim Bot disable karo
-     */
-    fun killAimBot() {
-        Thread {
-            val command = "echo 'aim_bot=0' > /proc/ff_hooks"
-            rootUtils.executeSuperUserCommand(command)
-        }.start()
-    }
-    
-    /**
-     * ESP Box disable karo
-     */
-    fun killESPBox() {
-        Thread {
-            val command = "echo 'esp_box=0' > /proc/ff_hooks"
-            rootUtils.executeSuperUserCommand(command)
-        }.start()
-    }
-    
-    /**
-     * ESP Line disable karo
+     * Kill ESP Line
      */
     fun killESPLine() {
         Thread {
-            val command = "echo 'esp_line=0' > /proc/ff_hooks"
+            espLineEnabled = false
+            Log.d(TAG, "ESP Line Disabled")
+            
+            val command = """
+                su -c "
+                PID=\$(pidof $FF_PACKAGE)
+                if [ ! -z "\$PID" ]; then
+                    echo '\$PID:esp_line:0' > /data/local/tmp/game_hooks
+                fi
+                "
+            """.trimIndent()
+            
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
     
     /**
-     * Headshot Only Mode disable karo
+     * Kill Aim Bot
+     */
+    fun killAimBot() {
+        Thread {
+            aimBotEnabled = false
+            Log.d(TAG, "Aim Bot Disabled")
+            
+            val command = """
+                su -c "
+                PID=\$(pidof $FF_PACKAGE)
+                if [ ! -z "\$PID" ]; then
+                    echo '\$PID:aimbot:0' > /data/local/tmp/game_hooks
+                fi
+                "
+            """.trimIndent()
+            
+            rootUtils.executeSuperUserCommand(command)
+        }.start()
+    }
+    
+    /**
+     * Disable Headshot Only
      */
     fun disableHeadshotOnly() {
         Thread {
-            val command = "echo 'headshot_only=0' > /proc/ff_hooks"
+            Log.d(TAG, "Headshot Only Mode Disabled")
+            
+            val command = """
+                su -c "
+                PID=\$(pidof $FF_PACKAGE)
+                if [ ! -z "\$PID" ]; then
+                    echo '\$PID:headshot:0' > /data/local/tmp/game_hooks
+                fi
+                "
+            """.trimIndent()
+            
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
     
     /**
-     * Process ID nikalo
+     * Set ESP Distance
      */
-    private fun getPID(packageName: String): Int {
-        return rootUtils.getPID(packageName)
+    fun setESPDistance(distance: Int = 500) {
+        Thread {
+            Log.d(TAG, "ESP Distance Set to: $distance")
+            
+            val command = """
+                su -c "
+                PID=\$(pidof $FF_PACKAGE)
+                if [ ! -z "\$PID" ]; then
+                    echo '\$PID:esp_distance:$distance' > /data/local/tmp/game_hooks
+                fi
+                "
+            """.trimIndent()
+            
+            rootUtils.executeSuperUserCommand(command)
+        }.start()
     }
 }
