@@ -54,10 +54,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
-            // Free Fire Card Click
+            // Free Fire Card Click - Launch Game
             freeFireCard.setOnClickListener {
                 if (isRootGranted) {
-                    openModMenu()
+                    launchFreeFireGame()
                 } else {
                     Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
                 }
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             // Launch Button
             launchFFBtn.setOnClickListener {
                 if (isRootGranted) {
-                    openModMenu()
+                    launchFreeFireGame()
                 } else {
                     Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
                 }
@@ -278,5 +278,59 @@ class MainActivity : AppCompatActivity() {
         modMenuVisible = true
         
         Toast.makeText(this, "🎯 Mod Menu Loaded...", Toast.LENGTH_SHORT).show()
+    }
+    
+    /**
+     * Free Fire game launch karo
+     */
+    private fun launchFreeFireGame() {
+        try {
+            // Free Fire packages try karo
+            val freeFirePackages = listOf(
+                "com.dts.freefire",      // Global
+                "com.dts.freefireth",    // Thailand
+                "com.dts.freefirebd"     // Bangladesh
+            )
+            
+            var gamePackage = ""
+            for (pkg in freeFirePackages) {
+                try {
+                    packageManager.getApplicationInfo(pkg, 0)
+                    gamePackage = pkg
+                    break
+                } catch (e: Exception) {
+                    // Package not found, try next
+                }
+            }
+            
+            if (gamePackage.isEmpty()) {
+                Toast.makeText(this, "❌ Free Fire not installed!", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            // Show message
+            Toast.makeText(this, "🎮 Launching Free Fire...", Toast.LENGTH_SHORT).show()
+            
+            // Game launch karo
+            val intent = packageManager.getLaunchIntentForPackage(gamePackage)
+            if (intent != null) {
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                
+                // Give game time to start, then minimize app
+                Thread {
+                    Thread.sleep(2000)  // Wait 2 seconds for game to load
+                    runOnUiThread {
+                        moveTaskToBack(true)
+                        Toast.makeText(this@MainActivity, "✅ Floating menu active! Tap 📱 to control", Toast.LENGTH_SHORT).show()
+                    }
+                }.start()
+                
+            } else {
+                Toast.makeText(this, "❌ Can't launch Free Fire", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "❌ Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 }
