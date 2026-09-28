@@ -1,11 +1,8 @@
 package com.rootpanel.freefire
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
+import android.app.AlertDialog
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
@@ -13,8 +10,8 @@ class MainActivity : AppCompatActivity() {
     
     private val rootUtils = RootUtils()
     private lateinit var gameInjector: GameInjector
-    private lateinit var gameDetector: GameDetector
     private var isRootGranted = false
+    private var modMenuVisible = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
@@ -22,58 +19,52 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
             
             gameInjector = GameInjector(rootUtils, this)
-            gameDetector = GameDetector(this)
             
+            // Root permission request karo
             requestRootPermission()
-            checkOverlayPermission()
             
+            // UI Elements
+            val iconX = findViewById<ImageButton>(R.id.iconX)
+            val modMenuContainer = findViewById<LinearLayout>(R.id.modMenuContainer)
+            val freeFireCard = findViewById<FrameLayout>(R.id.freeFireCard)
             val launchFFBtn = findViewById<Button>(R.id.launchFFBtn)
             
-            launchFFBtn.setOnClickListener {
-                if (!canDrawOverlays()) {
-                    Toast.makeText(this, "Grant overlay permission first!", Toast.LENGTH_LONG).show()
-                    requestOverlayPermission()
-                    return@setOnClickListener
-                }
-                
+            // X icon - toggle mod menu
+            iconX.setOnClickListener {
                 if (isRootGranted) {
-                    launchGameWithOverlay()
+                    modMenuVisible = !modMenuVisible
+                    modMenuContainer.visibility = if (modMenuVisible) View.VISIBLE else View.GONE
                 } else {
-                    Toast.makeText(this, "Root Permission Required!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
                 }
             }
             
+            // Free Fire Card Click
+            freeFireCard.setOnClickListener {
+                if (isRootGranted) {
+                    openModMenu()
+                } else {
+                    Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+                }
+            }
+            
+            // Launch Button
+            launchFFBtn.setOnClickListener {
+                if (isRootGranted) {
+                    openModMenu()
+                } else {
+                    Toast.makeText(this, "❌ Root Permission Required!", Toast.LENGTH_SHORT).show()
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "❌ Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
-    private fun checkOverlayPermission() {
-        if (!canDrawOverlays()) {
-            Toast.makeText(
-                this,
-                "⚠️ Tap SETTINGS to enable overlay permission",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-    
-    private fun canDrawOverlays(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return Settings.canDrawOverlays(this)
-        }
-        return true
-    }
-    
-    private fun requestOverlayPermission() {
-        val intent = Intent(
-            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            Uri.parse("package:$packageName")
-        )
-        startActivity(intent)
-    }
-    
+    /**
+     * Root permission request karo
+     */
     private fun requestRootPermission() {
         Thread {
             val granted = rootUtils.testRootAccess()
@@ -81,110 +72,196 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 if (granted) {
                     isRootGranted = true
-                    Toast.makeText(this, "✅ Root Access Granted!", Toast.LENGTH_SHORT).show()
-                    Log.d("MainActivity", "Root granted")
+                    enableAllButtons()
+                    showRootDialog("✓ Root Granted", "All features ready to inject!", true)
                 } else {
                     isRootGranted = false
-                    Toast.makeText(this, "❌ Root Access Required!", Toast.LENGTH_SHORT).show()
-                    Log.e("MainActivity", "Root denied")
+                    disableAllButtons()
+                    showRootDialog("❌ Root Denied", "Root access required!", false)
                 }
             }
         }.start()
     }
     
-    private fun launchGameWithOverlay() {
-        Thread {
-            try {
-                Log.d("GameLaunch", "Detecting Free Fire...")
-                
-                val ffPackage = gameDetector.detectFreeFirePackage()
-                
-                if (ffPackage == null) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Free Fire Not Installed!",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    return@Thread
-                }
-                
-                runOnUiThread {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Found Free Fire!\n🚀 Launching...",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                
-                launchFFGame(ffPackage)
-                
-            } catch (e: Exception) {
-                Log.e("GameLaunch", "Error: ${e.message}", e)
-                runOnUiThread {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Error: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }.start()
-    }
-    
-    private fun launchFFGame(packageName: String) {
+    /**
+     * Sab buttons enable karo
+     */
+    private fun enableAllButtons() {
         try {
-            Log.d("GameLaunch", "Launching: $packageName")
+            findViewById<CheckBox>(R.id.aimAssistCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.silentAimCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.autoAimCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.espBoxCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.espLineCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.espNameCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.espHealthCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.espDistanceCheckbox).isEnabled = true
+            findViewById<CheckBox>(R.id.headshotOnlyCheckbox).isEnabled = true
+            findViewById<SeekBar>(R.id.smoothSlider).isEnabled = true
+            findViewById<SeekBar>(R.id.fovSlider).isEnabled = true
             
-            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            
-            if (launchIntent == null) {
-                runOnUiThread {
-                    Toast.makeText(this, "Cannot launch game!", Toast.LENGTH_LONG).show()
-                }
-                return
-            }
-            
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-            
-            startActivity(launchIntent)
-            Log.d("GameLaunch", "Game launched")
-            
-            Thread.sleep(1500)
-            
-            runOnUiThread {
-                Log.d("GameLaunch", "Starting overlay...")
-                
-                val overlayIntent = Intent(this@MainActivity, FloatingOverlayService::class.java)
-                overlayIntent.putExtra("game_package", packageName)
-                
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(overlayIntent)
-                } else {
-                    startService(overlayIntent)
-                }
-                
-                Log.d("GameLaunch", "Overlay started")
-                Toast.makeText(
-                    this@MainActivity,
-                    "Game Running!\nTap HINA for Mod Menu",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            
+            addCheckBoxListeners()
         } catch (e: Exception) {
-            Log.e("GameLaunch", "Launch error: ${e.message}", e)
-            runOnUiThread {
-                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+            e.printStackTrace()
         }
     }
     
-    override fun onDestroy() {
-        super.onDestroy()
-        stopService(Intent(this, FloatingOverlayService::class.java))
+    /**
+     * Sab buttons disable karo
+     */
+    private fun disableAllButtons() {
+        try {
+            findViewById<CheckBox>(R.id.aimAssistCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.silentAimCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.autoAimCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.espBoxCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.espLineCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.espNameCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.espHealthCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.espDistanceCheckbox).isEnabled = false
+            findViewById<CheckBox>(R.id.headshotOnlyCheckbox).isEnabled = false
+            findViewById<SeekBar>(R.id.smoothSlider).isEnabled = false
+            findViewById<SeekBar>(R.id.fovSlider).isEnabled = false
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Checkbox listeners add karo
+     */
+    private fun addCheckBoxListeners() {
+        // Aim Assist
+        findViewById<CheckBox>(R.id.aimAssistCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectAimBot()
+                Toast.makeText(this, "✅ Aim Bot Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                gameInjector.killAimBot()
+                Toast.makeText(this, "❌ Aim Bot Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // Silent Aim - not implemented, disabled
+        findViewById<CheckBox>(R.id.silentAimCheckbox).isEnabled = false
+        
+        // Auto Aim
+        findViewById<CheckBox>(R.id.autoAimCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectAimBot(5.0f)
+                Toast.makeText(this, "✅ Auto Aim Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                gameInjector.killAimBot()
+                Toast.makeText(this, "❌ Auto Aim Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // ESP Box
+        findViewById<CheckBox>(R.id.espBoxCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectESPBox()
+                Toast.makeText(this, "✅ ESP Box Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                gameInjector.killESPBox()
+                Toast.makeText(this, "❌ ESP Box Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // ESP Line
+        findViewById<CheckBox>(R.id.espLineCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectESPLine()
+                Toast.makeText(this, "✅ ESP Line Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                gameInjector.killESPLine()
+                Toast.makeText(this, "❌ ESP Line Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // ESP Name (FIXED - Ab sahi method call)
+        findViewById<CheckBox>(R.id.espNameCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectESPName()  // ✅ CORRECT
+                Toast.makeText(this, "✅ ESP Name Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "❌ ESP Name Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // ESP Health (FIXED - Ab sahi method call)
+        findViewById<CheckBox>(R.id.espHealthCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectESPHealth()  // ✅ CORRECT
+                Toast.makeText(this, "✅ ESP Health Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "❌ ESP Health Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // ESP Distance
+        findViewById<CheckBox>(R.id.espDistanceCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.setESPDistance(500)
+                Toast.makeText(this, "✅ ESP Distance Injected!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "❌ ESP Distance Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // Headshot Only Mode
+        findViewById<CheckBox>(R.id.headshotOnlyCheckbox).setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                gameInjector.injectHeadshotOnly()
+                Toast.makeText(this, "🎯 Headshot Only Mode Activated!", Toast.LENGTH_SHORT).show()
+            } else {
+                gameInjector.disableHeadshotOnly()
+                Toast.makeText(this, "❌ Headshot Mode Disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // Smooth Slider
+        findViewById<SeekBar>(R.id.smoothSlider).setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val smoothValue = (progress / 10.0f)
+                gameInjector.injectAimBot(smoothValue)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+        
+        // FOV Slider
+        findViewById<SeekBar>(R.id.fovSlider).setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                gameInjector.setFOV(progress)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+    }
+    
+    /**
+     * Root dialog show karo
+     */
+    private fun showRootDialog(title: String, message: String, isGranted: Boolean) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .setCancelable(false)
+            .show()
+    }
+    
+    /**
+     * Mod menu open karo
+     */
+    private fun openModMenu() {
+        val modMenuContainer = findViewById<LinearLayout>(R.id.modMenuContainer)
+        val launcherSection = findViewById<FrameLayout>(R.id.freeFireCard)
+        
+        launcherSection.visibility = View.GONE
+        modMenuContainer.visibility = View.VISIBLE
+        modMenuVisible = true
+        
+        Toast.makeText(this, "🎯 Mod Menu Loaded...", Toast.LENGTH_SHORT).show()
     }
 }
