@@ -1,65 +1,43 @@
 package com.rootpanel.freefire
 
 import android.content.Context
-import android.view.WindowManager
-import android.widget.FrameLayout
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.util.Log
 
 class GameInjector(private val rootUtils: RootUtils, private val context: Context) {
     
     private val TAG = "GameInjector"
     
-    // Free Fire packages
     private val FF_PACKAGES = listOf(
-        "com.dts.freefire",      // Global
-        "com.dts.freefireth",    // Thailand
-        "com.dts.freefirebd"     // Bangladesh
+        "com.dts.freefire",
+        "com.dts.freefireth",
+        "com.dts.freefirebd"
     )
     
     private val FF_PACKAGE: String by lazy { detectFFPackage() }
     
-    // Game state
     private var espBoxEnabled = false
     private var espLineEnabled = false
     private var espNameEnabled = false
     private var aimBotEnabled = false
     
-    /**
-     * Free Fire package detect karo
-     */
     private fun detectFFPackage(): String {
         return try {
             FF_PACKAGES.firstOrNull { packageName ->
                 rootUtils.isPackageInstalled(packageName)
-            } ?: "com.dts.freefire"
+            } ?: "com.dts.freefireth"
         } catch (e: Exception) {
-            "com.dts.freefire"
+            "com.dts.freefireth"
         }
     }
     
-    /**
-     * ESP Box inject karo - REAL IMPLEMENTATION
-     */
     fun injectESPBox() {
         Thread {
             try {
                 espBoxEnabled = true
-                Log.d(TAG, "ESP Box Enabled")
+                Log.d(TAG, "✅ ESP Box Injected")
                 
-                // Method 1: Direct memory write
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        # Write to game memory
-                        echo '\$PID:esp_box:1' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_box:1' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -68,24 +46,14 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * ESP Line inject karo
-     */
     fun injectESPLine() {
         Thread {
             try {
                 espLineEnabled = true
-                Log.d(TAG, "ESP Line Enabled")
+                Log.d(TAG, "✅ ESP Line Injected")
                 
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        echo '\$PID:esp_line:1' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_line:1' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -94,24 +62,14 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * Aim Bot inject karo
-     */
     fun injectAimBot(smooth: Float = 5.0f) {
         Thread {
             try {
                 aimBotEnabled = true
-                Log.d(TAG, "Aim Bot Enabled with smooth: $smooth")
+                Log.d(TAG, "✅ Aim Bot Injected (Smooth: $smooth)")
                 
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        echo '\$PID:aimbot:1:\$smooth' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:aimbot:1:$smooth' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -120,24 +78,29 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * ESP Name inject karo
-     */
+    fun injectSilentAim() {
+        Thread {
+            try {
+                Log.d(TAG, "✅ Silent Aim Injected")
+                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:silent_aim:1' > /data/local/tmp/game_hooks; fi\""
+                rootUtils.executeSuperUserCommand(command)
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Silent Aim Error: ${e.message}")
+            }
+        }.start()
+    }
+    
     fun injectESPName() {
         Thread {
             try {
                 espNameEnabled = true
-                Log.d(TAG, "ESP Name Enabled")
+                Log.d(TAG, "✅ ESP Name Injected")
                 
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        echo '\$PID:esp_name:1' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_name:1' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -146,23 +109,13 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * ESP Health inject karo
-     */
     fun injectESPHealth() {
         Thread {
             try {
-                Log.d(TAG, "ESP Health Enabled")
+                Log.d(TAG, "✅ ESP Health Injected")
                 
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        echo '\$PID:esp_health:1' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_health:1' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -171,23 +124,13 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * Headshot Only Mode inject
-     */
     fun injectHeadshotOnly() {
         Thread {
             try {
-                Log.d(TAG, "Headshot Only Mode Enabled")
+                Log.d(TAG, "✅ Headshot Only Mode Injected")
                 
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        echo '\$PID:headshot:1' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:headshot:1' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -196,23 +139,13 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * FOV set karo
-     */
     fun setFOV(fov: Int = 90) {
         Thread {
             try {
-                Log.d(TAG, "FOV Set to: $fov")
+                Log.d(TAG, "✅ FOV Set to: $fov°")
                 
-                val command = """
-                    su -c "
-                    PID=\$(pidof $FF_PACKAGE)
-                    if [ ! -z "\$PID" ]; then
-                        echo '\$PID:fov:$fov' > /data/local/tmp/game_hooks
-                    fi
-                    "
-                """.trimIndent()
-                
+                val dollarSign = "$"
+                val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:fov:$fov' > /data/local/tmp/game_hooks; fi\""
                 rootUtils.executeSuperUserCommand(command)
                 
             } catch (e: Exception) {
@@ -221,105 +154,55 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
         }.start()
     }
     
-    /**
-     * Kill ESP Box
-     */
     fun killESPBox() {
         Thread {
             espBoxEnabled = false
-            Log.d(TAG, "ESP Box Disabled")
+            Log.d(TAG, "❌ ESP Box Disabled")
             
-            val command = """
-                su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:esp_box:0' > /data/local/tmp/game_hooks
-                fi
-                "
-            """.trimIndent()
-            
+            val dollarSign = "$"
+            val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_box:0' > /data/local/tmp/game_hooks; fi\""
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
     
-    /**
-     * Kill ESP Line
-     */
     fun killESPLine() {
         Thread {
             espLineEnabled = false
-            Log.d(TAG, "ESP Line Disabled")
+            Log.d(TAG, "❌ ESP Line Disabled")
             
-            val command = """
-                su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:esp_line:0' > /data/local/tmp/game_hooks
-                fi
-                "
-            """.trimIndent()
-            
+            val dollarSign = "$"
+            val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_line:0' > /data/local/tmp/game_hooks; fi\""
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
     
-    /**
-     * Kill Aim Bot
-     */
     fun killAimBot() {
         Thread {
             aimBotEnabled = false
-            Log.d(TAG, "Aim Bot Disabled")
+            Log.d(TAG, "❌ Aim Bot Disabled")
             
-            val command = """
-                su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:aimbot:0' > /data/local/tmp/game_hooks
-                fi
-                "
-            """.trimIndent()
-            
+            val dollarSign = "$"
+            val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:aimbot:0' > /data/local/tmp/game_hooks; fi\""
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
     
-    /**
-     * Disable Headshot Only
-     */
     fun disableHeadshotOnly() {
         Thread {
-            Log.d(TAG, "Headshot Only Mode Disabled")
+            Log.d(TAG, "❌ Headshot Only Mode Disabled")
             
-            val command = """
-                su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:headshot:0' > /data/local/tmp/game_hooks
-                fi
-                "
-            """.trimIndent()
-            
+            val dollarSign = "$"
+            val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:headshot:0' > /data/local/tmp/game_hooks; fi\""
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
     
-    /**
-     * Set ESP Distance
-     */
     fun setESPDistance(distance: Int = 500) {
         Thread {
-            Log.d(TAG, "ESP Distance Set to: $distance")
+            Log.d(TAG, "✅ ESP Distance Set to: $distance")
             
-            val command = """
-                su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:esp_distance:$distance' > /data/local/tmp/game_hooks
-                fi
-                "
-            """.trimIndent()
-            
+            val dollarSign = "$"
+            val command = "su -c \"PID=${dollarSign}(pidof $FF_PACKAGE); if [ ! -z ${dollarSign}PID ]; then echo '${dollarSign}PID:esp_distance:$distance' > /data/local/tmp/game_hooks; fi\""
             rootUtils.executeSuperUserCommand(command)
         }.start()
     }
