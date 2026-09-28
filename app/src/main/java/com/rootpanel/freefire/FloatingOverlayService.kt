@@ -325,11 +325,11 @@ class FloatingOverlayService : Service() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            max = (max - min).toInt()
+            this.max = (max - min).toInt()
             progress = (default - min).toInt()
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    val value = min + progress
+                    val value = min + progress.toFloat()
                     labelView.text = "$label: ${value.toInt()}"
                     onValueChange(value)
                 }
