@@ -1,7 +1,10 @@
 package com.rootpanel.freefire
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -20,8 +23,20 @@ class MainActivity : AppCompatActivity() {
             
             gameInjector = GameInjector(rootUtils, this)
             
+            // Request overlay permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.canDrawOverlays(this)) {
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    startActivity(intent)
+                }
+            }
+            
             // Root permission request karo
             requestRootPermission()
+            
+            // Start Floating Overlay Service
+            val overlayIntent = Intent(this, FloatingOverlayService::class.java)
+            startService(overlayIntent)
             
             // UI Elements
             val iconX = findViewById<ImageButton>(R.id.iconX)
