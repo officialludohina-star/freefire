@@ -19,7 +19,7 @@ class FloatingOverlayService : Service() {
         Log.d(TAG, "FloatingOverlayService Created")
         
         try {
-            rootUtils = RootUtils(this)
+            rootUtils = RootUtils()
             gameInjector = GameInjector(rootUtils, this)
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing: ${e.message}")

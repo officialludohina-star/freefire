@@ -272,9 +272,9 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
             
             val command = """
                 su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:aimbot:0' > /data/local/tmp/game_hooks
+                PID=${'$'}(pidof $FF_PACKAGE)
+                if [ ! -z "${'$'}PID" ]; then
+                    echo "${'$'}PID:aimbot:0" > /data/local/tmp/game_hooks
                 fi
                 "
             """.trimIndent()
@@ -292,9 +292,9 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
             
             val command = """
                 su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:headshot:0' > /data/local/tmp/game_hooks
+                PID=${'$'}(pidof $FF_PACKAGE)
+                if [ ! -z "${'$'}PID" ]; then
+                    echo "${'$'}PID:headshot:0" > /data/local/tmp/game_hooks
                 fi
                 "
             """.trimIndent()
@@ -312,9 +312,9 @@ class GameInjector(private val rootUtils: RootUtils, private val context: Contex
             
             val command = """
                 su -c "
-                PID=\$(pidof $FF_PACKAGE)
-                if [ ! -z "\$PID" ]; then
-                    echo '\$PID:esp_distance:$distance' > /data/local/tmp/game_hooks
+                PID=${'$'}(pidof $FF_PACKAGE)
+                if [ ! -z "${'$'}PID" ]; then
+                    echo "${'$'}PID:esp_distance:$distance" > /data/local/tmp/game_hooks
                 fi
                 "
             """.trimIndent()
